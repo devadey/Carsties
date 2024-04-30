@@ -8,10 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 
-builder.Services.AddDbContext<AuctionDbContext>(options => 
+builder.Services.AddDbContext<AuctionDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 
@@ -20,5 +22,14 @@ var app = builder.Build();
 app.UseAuthorization();
 
 app.MapControllers();
+
+try
+{
+    DbInitializer.Init(app);
+}
+catch (Exception ex)
+{
+    Console.WriteLine("Could not seed the data.");
+}
 
 app.Run();
