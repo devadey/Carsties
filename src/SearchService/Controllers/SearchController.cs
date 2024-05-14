@@ -14,19 +14,28 @@ namespace SearchService.Controllers
     {
 
         [HttpGet]
-        public async Task<ActionResult<List<Item>>> GetAllAsync(string searchTerm)
+        public async Task<ActionResult<List<Item>>> SearchItems(string searchTerm, int pageNumber=1, int pageSize=4)
         {
-            var query = DB.Find<Item>();
+            var query = DB.PagedSearch<Item>();
 
-            query.Sort(s => s.Ascending(a => a.Make));
+            query.Sort(b => b.Ascending(s => s.Make));
 
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 query.Match(Search.Full, searchTerm).SortByTextScore();
             }
 
+            query.PageNumber(pageNumber);
+            query.PageSize(pageSize);
+
             var result = await query.ExecuteAsync();
-            return result;
+            if (result.TotalCount == 0)
+                return NotFound("No result matches the search term.");
+            return Ok(new{
+                result = result.Results,
+                pageCount = result.PageCount,
+                totalCount = result.TotalCount
+            });
         }
     }
 }
