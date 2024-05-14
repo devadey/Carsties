@@ -29,7 +29,7 @@ try
 }
 catch (Exception ex)
 {
-    Console.WriteLine("Could not seed the data.");
+    Console.WriteLine(ex);
 }
 
 app.Run();
